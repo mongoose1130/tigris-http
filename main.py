@@ -30,17 +30,7 @@ async def root():
     TOKEN = rdict["access_token"]
 
     # return resp.status_code
-    return TOKEN
-
-
-@app.get("/create-database/{name}")
-async def create_database(name: str):
-    # in the docs: name = 'sampledb'
-    url = 'https://' + URI + '/v1/projects/' + PROJECT + '/database/branches/' + name + '/create'
-    head = {'Authorization': 'Bearer ' + TOKEN}
-
-    resp = requests.post(url, headers=head)
-    return resp.status_code
+    return 'Your token is good for: ' + str(rdict["expires_in"]) + ' seconds!'
 
 
 @app.get("/create-update-collection/{name}")
@@ -110,6 +100,10 @@ async def insert_documents(collection: str):
             {
                 'name': 'Elon Musk',
                 'balance': 245025.65
+            },
+            {
+                'name': 'Elvis Presley',
+                'balance': 0
             }
         ]
     }
@@ -190,6 +184,39 @@ async def search_documents(collection: str, query):
 
     datj = json.dumps(data)
     resp = requests.post(url, data=datj, headers=head)
+    return resp.json()
+
+
+@app.get("/delete-document/{collection}/{id}")
+async def delete_document(collection: str, id: int):
+    # slightly different from the quickstart, only allowing for one delete at a time
+    url = 'https://' + URI + '/v1/projects/' + PROJECT + '/database/collections/' + collection + '/documents/delete'
+    head = {
+        'Authorization': 'Bearer ' + TOKEN,
+        'content-type': 'application/json'
+    }
+
+    # I kept the syntax here the same to illustrate the filter, but there is no record id 0
+    data = {
+        'filter': {
+            '$or': [
+                {'id': 0},
+                {'id': 4}
+            ]
+        }
+    }
+
+    datj = json.dumps(data)
+    resp = requests.delete(url, data=datj, headers=head)
+    return resp.json()
+
+
+@app.get("/delete-collection/{collection}")
+async def delete_collection(collection: str):
+    url = 'https://' + URI + '/v1/projects/' + PROJECT + '/database/collections/' + collection + '/drop'
+    head = {'Authorization': 'Bearer ' + TOKEN}
+
+    resp = requests.delete(url, headers=head)
     return resp.json()
 
 

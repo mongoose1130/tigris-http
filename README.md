@@ -5,4 +5,5 @@ https://www.tigrisdata.com/docs/quickstarts/quickstart-http/
 
 ## dev-note
 This project is just for concept comprehension of the API calls. In a production environment you would want to change
-all the "get" methods to "post" to keep data hidden. Perhaps at some point I will craft a decent front-end for it 😅
+all the "get" methods to "post" to keep data hidden, as well as implement a way to refresh the auth token. Perhaps at 
+some point I will craft a decent front-end for it 😅

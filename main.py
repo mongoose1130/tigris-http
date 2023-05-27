@@ -29,7 +29,8 @@ async def root():
     rdict = resp.json()
     TOKEN = rdict["access_token"]
 
-    return resp.status_code
+    # return resp.status_code
+    return TOKEN
 
 
 @app.get("/create-database/{name}")
@@ -85,6 +86,110 @@ async def list_collection(name: str):
     head = {'Authorization': 'Bearer ' + TOKEN}
 
     resp = requests.post(url, headers=head)
+    return resp.json()
+
+
+@app.get("/insert-documents/{collection}")
+async def insert_documents(collection: str):
+    url = 'https://' + URI + '/v1/projects/' + PROJECT + '/database/collections/' + collection + '/documents/insert'
+    head = {
+        'Authorization': 'Bearer ' + TOKEN,
+        'content-type': 'application/json'
+    }
+
+    data = {
+        'documents': [
+            {
+                'name': 'Jania McGrory',
+                'balance': 6045.7
+            },
+            {
+                'name': 'Bunny Instone',
+                'balance': 2948.87
+            },
+            {
+                'name': 'Elon Musk',
+                'balance': 245025.65
+            }
+        ]
+    }
+
+    datj = json.dumps(data)
+    resp = requests.post(url, data=datj, headers=head)
+    return resp.json()
+
+
+@app.get("/read-document/{collection}/{field}/{value}")
+async def read_document(collection: str, field: str, value):
+    # the name parameter here is for the collection name (users)
+    url = 'https://' + URI + '/v1/projects/' + PROJECT + '/database/collections/' + collection + '/documents/read'
+    head = {
+        'Authorization': 'Bearer ' + TOKEN,
+        'content-type': 'application/json'
+    }
+
+    data = {
+        'filter': {
+            field: value
+        }
+    }
+
+    datj = json.dumps(data)
+    resp = requests.post(url, data=datj, headers=head)
+    return resp.json()
+
+
+@app.get("/update-document/{collection}/{id}/{field}/{value}")
+async def update_document(collection: str, id: int, field: str, value):
+    url = 'https://' + URI + '/v1/projects/' + PROJECT + '/database/collections/' + collection + '/documents/update'
+    head = {
+        'Authorization': 'Bearer ' + TOKEN,
+        'content-type': 'application/json'
+    }
+
+    if field == 'balance':
+        val = float(value)
+    else:
+        val = str(value)
+
+    data = {
+        'fields': {
+            '$set': {
+                field: val
+            }
+        },
+        'filter': {
+            'id': id
+        }
+    }
+
+    datj = json.dumps(data)
+    resp = requests.put(url, data=datj, headers=head)
+    return resp.json()
+
+
+@app.get("/search-documents/{collection}")
+async def search_documents(collection: str, query):
+    # there will have to be extensive modifications here to allow for the various filters and such that could happen!
+    # for now just going with the simple solution in the quickstart
+    url = 'https://' + URI + '/v1/projects/' + PROJECT + '/database/collections/' + collection + '/documents/search'
+    head = {
+        'Authorization': 'Bearer ' + TOKEN,
+        'content-type': 'application/json'
+    }
+
+    data = {
+        'q': 'bunny',
+        'search_fields': ['name'],
+        'filter': {
+            'balance': {
+                '$gt': 500
+            }
+        }
+    }
+
+    datj = json.dumps(data)
+    resp = requests.post(url, data=datj, headers=head)
     return resp.json()
 
 
